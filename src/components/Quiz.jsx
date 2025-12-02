@@ -1,18 +1,44 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback,useRef  } from 'react'
 import QUESTIONS from '../QUESTIONS.js';
 import summaryLogo from '../assets/quiz-complete.png'
 import QuestionTimer from './QuestionTimer.jsx'
+
 export default function Quiz() {
+    const shuffledAnswer = useRef();
     const [userAnswer, setUserAnswer] = useState([]);
-    const activeQuestionIndex = userAnswer.length;
+    const [answerState,setAnswerState] = useState('');
+     let activeQuestionIndex =answerState === '' ? userAnswer.length : userAnswer.length - 1;
     const quisIsComplete = activeQuestionIndex === QUESTIONS.length;
 
 
+
+    if (activeQuestionIndex < 0) {
+    activeQuestionIndex = 0;
+  }
+  if (activeQuestionIndex >= QUESTIONS.length) {
+    activeQuestionIndex = QUESTIONS.length - 1;
+  }
+
+  
     const handleSelectAnswer = useCallback(function handleSelectAnswer(selectedAnswer) {
+        setAnswerState('answered');
         setUserAnswer((prevState) => {
             return [...prevState, selectedAnswer,];
         });
-    }, []);
+
+        setTimeout(()=>{
+            if (selectedAnswer === QUESTIONS[activeQuestionIndex].answers[0]){
+                setAnswerState('correct');
+            }
+            else{
+                setAnswerState('wrong');
+            }
+            setTimeout(()=>{
+                setAnswerState('');
+            },2000)
+        },1000)
+
+    }, [activeQuestionIndex]);
     const handleSkipAnser = useCallback(() => handleSelectAnswer(null), [handleSelectAnswer])
 
     if (quisIsComplete) {
@@ -23,12 +49,14 @@ export default function Quiz() {
             </div>
         );
     }
-    const shaffledArray = [...QUESTIONS[activeQuestionIndex].answers];
-    shaffledArray.sort(() => Math.random() - 0.5);
+    if(!shuffledAnswer.current){
+        shuffledAnswer.current = [...QUESTIONS[activeQuestionIndex].answers];
+        shuffledAnswer.current.sort(() => Math.random() - 0.5);
+    }
 
     return (
         <div id='quiz'>
-            <div id="questions">
+            <div id="question">
                 
                 <QuestionTimer
                     key={activeQuestionIndex}
@@ -38,14 +66,33 @@ export default function Quiz() {
 
                 <h2> {QUESTIONS[activeQuestionIndex].text}</h2>
                 <ul id="answers">
-                    {shaffledArray.map((answer) => {
-                        return (
-                            <li key={answer} className="answer">
-                                <button onClick={() => handleSelectAnswer(answer)}>{answer}</button>
-                            </li>
-                        );
-                    })}
-                </ul>
+          {shuffledAnswer.current.map(answer => {
+            const isSelected = userAnswer[userAnswer.length - 1] === answer;
+            let cssCalsses = '';
+
+            if (answerState === 'answered' && isSelected) {
+              cssCalsses = 'selected';
+            }
+            if (
+              (answerState === 'correct' || answerState === 'wrong') &&
+              isSelected
+            ) {
+              cssCalsses = answerState;
+            }
+
+            return (
+              // give li the base .answer class, and put state class on the button
+              <li key={answer} className="answer">
+                <button
+                  className={cssCalsses}
+                  onClick={() => handleSelectAnswer(answer)}
+                >
+                  {answer}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
             </div>
         </div>
     );

@@ -3,6 +3,7 @@ import Quiz from "./components/Quiz";
 function App() {
     return(
         <>
+        
             <Header />
             <main>
             <Quiz />
