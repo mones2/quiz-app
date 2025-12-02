@@ -54,7 +54,7 @@ export default function Quiz() {
         shuffledAnswer.current.sort(() => Math.random() - 0.5);
     }
 
-    return (
+    return ( 
         <div id='quiz'>
             <div id="question">
                 
