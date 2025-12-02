@@ -60,7 +60,7 @@ export default function Quiz() {
                 
                 <QuestionTimer
                     key={activeQuestionIndex}
-                    timeOut={1000}
+                    timeOut={10000}
                     onTimeOut={handleSkipAnser}
                 />
 
